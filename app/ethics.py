@@ -17,6 +17,9 @@ from sklearn.preprocessing import StandardScaler
 
 SALT = os.environ.get("ATHENAEUM_SALT", "athenaeum-demo-salt")
 QUASI = ["department", "year", "gender"]
+SCHOOL = {"CSE": "Engineering", "AIDS": "Engineering", "ECE": "Engineering", "MECH": "Engineering",
+          "BIOTECH": "Sciences", "MBA": "Management", "ENGLISH": "Humanities", "HISTORY": "Humanities",
+          "FACULTY": "Faculty"}
 
 
 def pseudonym(member_id):
@@ -28,8 +31,8 @@ def anonymised_sample(frames, n=8):
     v = v.merge(frames["members"], on="member_id")
     return [{
         "token": pseudonym(r.member_id),
-        "department": r.department,
-        "cohort": "Faculty" if r.year == 0 else ("Junior (Y1-2)" if r.year <= 2 else "Senior (Y3-4)"),
+        "department": SCHOOL.get(r.department, "Other"),
+        "cohort": "Faculty" if r.year == 0 else ("Junior" if r.year <= 2 else "Senior"),
         "entry_hour": r.entry_time.strftime("%a %H:00"),
         "stay_band": f"{int(r.duration_min // 30 * 30)}-{int(r.duration_min // 30 * 30 + 30)} min",
         "purpose": r.purpose or "Not recorded",
@@ -90,7 +93,11 @@ def _recommendation_parity(frames, recommender, sample=120):
 def report(frames, recommender):
     members = frames["members"]
     generalised = members.assign(year=np.where(members.year == 0, "Faculty",
-                                               np.where(members.year <= 2, "Junior", "Senior")))
+                                               np.where(members.year <= 2, "Junior", "Senior")),
+                                 department=members.department.map(SCHOOL))
+    # suppression: mask gender only for records still in groups smaller than the threshold
+    small = generalised.groupby(QUASI)["member_id"].transform("size") < 5
+    generalised.loc[small, "gender"] = "*"
     by_gender, by_dept = _recommendation_parity(frames, recommender)
     parity, di = _late_model_parity(frames)
     opted_in = int(members.consent.sum())
@@ -98,8 +105,8 @@ def report(frames, recommender):
         "anonymised_sample": anonymised_sample(frames),
         "k_anonymity": {
             **k_anonymity(members, QUASI),
-            "after_generalisation": k_anonymity(generalised, QUASI),
-            "note": "Year of study is generalised to Junior/Senior/Faculty before any data leaves the system.",
+            "after_generalisation": {**k_anonymity(generalised, QUASI), "suppressed": int(small.sum())},
+            "note": "Before any data leaves the system, year of study becomes Junior/Senior/Faculty and department becomes its school (Engineering, Sciences, Management, Humanities); records still in groups below the threshold have gender suppressed.",
         },
         "consent": {"opted_in": opted_in, "opted_out": int(len(members) - opted_in)},
         "fairness": {

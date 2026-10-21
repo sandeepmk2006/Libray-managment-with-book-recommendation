@@ -78,12 +78,13 @@ def generate(n_members=320, days=120, seed=42, now=None):
             "joined": (start - timedelta(days=int(rng.integers(30, 900)))).date().isoformat(),
             "consent": int(rng.random() > 0.06),
         })
+        visit_rate = float(rng.gamma(2.0, 0.22))
         traits.append({
             "taste": taste,
             "diligence": float(np.clip(rng.normal(0.6 if year != 1 else 0.45, 0.2), 0.02, 1)),
-            "visit_rate": float(rng.gamma(2.0, 0.22)),        # visits/day
+            "visit_rate": visit_rate,                           # visits/day
             "stay_mu": float(rng.normal(np.log(75), 0.35)),   # lognormal mean of stay
-            "reader": float(rng.gamma(2.2, 0.85)),             # borrowing appetite
+            "reader": float(rng.gamma(2.2, 0.55) * (0.5 + 1.2 * visit_rate)),  # frequent visitors borrow more
             "early_bird": float(rng.normal(0, 1.5)),          # shifts preferred hour
         })
 

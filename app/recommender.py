@@ -262,7 +262,7 @@ class Recommender:
             nn = np.argsort(-self.user_sim[u])[:30]
             fans = nn[self.R[nn, i] >= 4]
             if len(fans):
-                reasons.append(f"{len(fans)} readers like you loved it")
+                reasons.append(f"{len(fans)} reader{'s' if len(fans) > 1 else ''} like you loved it")
         if method in ("svd", "hybrid") and self.n_ratings[i] >= 5:
             reasons.append(f"Rated {self.R[self.mask[:, i], i].mean():.1f}★ by {int(self.n_ratings[i])} readers")
         if method == "popular" or not reasons:

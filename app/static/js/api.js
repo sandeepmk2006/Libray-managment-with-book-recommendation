@@ -1,18 +1,37 @@
-const API_ROOT = '/api';
+// Thin fetch wrapper around the Flask API.
 async function request(path, options = {}) {
-  const res = await fetch(`${API_ROOT}${path}`, {headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options});
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  const res = await fetch(path, {
+    headers: { "Content-Type": "application/json" },
+    ...options,
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+  const type = res.headers.get("content-type") || "";
+  const data = type.includes("json") ? await res.json() : await res.text();
+  if (!res.ok) throw new Error((data && data.error) || `Request failed (${res.status})`);
   return data;
 }
-const qs = (params) => { const s = new URLSearchParams(params); return s.toString() ? `?${s}` : ''; };
+
+const get = (p) => request(p);
+const post = (p, body) => request(p, { method: "POST", body: body || {} });
+
 export const api = {
-  overview:()=>request('/overview'), scan:(member_id)=>request('/gate/scan',{method:'POST',body:JSON.stringify({member_id})}),
-  simulate:(n=8)=>request('/gate/simulate',{method:'POST',body:JSON.stringify({n})}), live:()=>request('/gate/live'),
-  members:(p={})=>request(`/members${qs(p)}`), member:(id)=>request(`/members/${encodeURIComponent(id)}`),
-  books:(p={})=>request(`/books${qs(p)}`), book:(id)=>request(`/books/${id}`), genres:()=>request('/genres'),
-  loan:(member_id,book_id)=>request('/loans',{method:'POST',body:JSON.stringify({member_id,book_id})}), returnLoan:(id)=>request(`/loans/${id}/return`,{method:'POST'}),
-  recommend:(id,method='hybrid')=>request(`/recommend/${encodeURIComponent(id)}${qs({method,k:10})}`), similar:(id)=>request(`/recommend/similar/${id}${qs({k:8})}`), evaluate:()=>request('/recommend/evaluate'),
-  analytics:(kind)=>request(`/analytics/${kind}`), predictLate:(member_id,book_id)=>request('/analytics/predict_late',{method:'POST',body:JSON.stringify({member_id,book_id})}),
-  graph:(min_weight=3)=>request(`/graph/books${qs({min_weight})}`), cypher:()=>fetch('/api/graph/cypher').then(r=>r.text()), ethics:()=>request('/ethics/report')
+  overview: () => get("/api/overview"),
+  scan: (member_id) => post("/api/gate/scan", { member_id }),
+  simulate: (n = 8) => post("/api/gate/simulate", { n }),
+  live: () => get("/api/gate/live"),
+  members: (q = "", limit = 50) => get(`/api/members?q=${encodeURIComponent(q)}&limit=${limit}`),
+  member: (id) => get(`/api/members/${encodeURIComponent(id)}`),
+  books: (q = "", genre = "") => get(`/api/books?q=${encodeURIComponent(q)}&genre=${encodeURIComponent(genre)}`),
+  book: (id) => get(`/api/books/${id}`),
+  genres: () => get("/api/genres"),
+  issue: (member_id, book_id) => post("/api/loans", { member_id, book_id }),
+  returnLoan: (id) => post(`/api/loans/${id}/return`),
+  recommend: (id, method = "hybrid", k = 10) => get(`/api/recommend/${encodeURIComponent(id)}?method=${method}&k=${k}`),
+  similar: (id, k = 8) => get(`/api/recommend/similar/${id}?k=${k}`),
+  evaluate: () => get("/api/recommend/evaluate"),
+  analytics: (name) => get(`/api/analytics/${name}`),
+  predictLate: (member_id, book_id) => post("/api/analytics/predict_late", { member_id, book_id }),
+  graph: (minWeight = 3) => get(`/api/graph/books?min_weight=${minWeight}`),
+  cypher: () => get("/api/graph/cypher"),
+  ethics: () => get("/api/ethics/report"),
 };
