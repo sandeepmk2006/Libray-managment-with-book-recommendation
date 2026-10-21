@@ -1,0 +1,121 @@
+book_id,title,author,genre,year,pages,description
+1,Dune,Frank Herbert,Science Fiction,1965,412,Desert planet politics ecology prophecy and a young heir fighting for spice and survival
+2,Foundation,Isaac Asimov,Science Fiction,1951,255,Psychohistory predicts the fall of a galactic empire and a plan to shorten the dark age
+3,Neuromancer,William Gibson,Science Fiction,1984,271,Hacker cyberspace artificial intelligence heist in a dystopian cyberpunk future
+4,The Left Hand of Darkness,Ursula K. Le Guin,Science Fiction,1969,304,Envoy on an ice planet explores gender politics and trust between alien cultures
+5,Hyperion,Dan Simmons,Science Fiction,1989,482,Pilgrims share stories on a journey to the time tombs and the mysterious Shrike
+6,The Martian,Andy Weir,Science Fiction,2011,369,Stranded astronaut uses science engineering and humor to survive alone on Mars
+7,Project Hail Mary,Andy Weir,Science Fiction,2021,476,Lone astronaut with amnesia must save Earth from a star eating microbe with an alien friend
+8,Ender's Game,Orson Scott Card,Science Fiction,1985,324,Gifted child trained through war games in space battle school against an alien threat
+9,The Three-Body Problem,Liu Cixin,Science Fiction,2008,400,Physics mystery first contact and civilization survival during the Cultural Revolution
+10,Snow Crash,Neal Stephenson,Science Fiction,1992,480,Pizza delivering hacker in the metaverse confronts a linguistic virus cyberpunk satire
+11,The Hobbit,J.R.R. Tolkien,Fantasy,1937,310,Hobbit joins dwarves on a quest to reclaim treasure from a dragon adventure magic
+12,The Fellowship of the Ring,J.R.R. Tolkien,Fantasy,1954,423,Fellowship sets out to destroy a ring of power epic quest magic and friendship
+13,A Game of Thrones,George R.R. Martin,Fantasy,1996,694,Noble houses scheme for the iron throne political intrigue war dragons and betrayal
+14,The Name of the Wind,Patrick Rothfuss,Fantasy,2007,662,Gifted young man recounts his life at a university of magic music and mystery
+15,Mistborn,Brandon Sanderson,Fantasy,2006,541,Street thief with metal based magic joins a heist to overthrow an immortal tyrant
+16,The Way of Kings,Brandon Sanderson,Fantasy,2010,1007,Soldiers scholars and storms on a shattered world epic magic and war
+17,Harry Potter and the Philosopher's Stone,J.K. Rowling,Fantasy,1997,223,Orphan boy discovers he is a wizard and attends a school of magic friendship mystery
+18,A Wizard of Earthsea,Ursula K. Le Guin,Fantasy,1968,183,Young wizard unleashes a shadow and must hunt it across an archipelago of magic
+19,The Lies of Locke Lamora,Scott Lynch,Fantasy,2006,499,Con artist gang heist in a Venice like city of thieves magic and revenge
+20,Good Omens,Terry Pratchett and Neil Gaiman,Fantasy,1990,412,Angel and demon team up to stop the apocalypse comic fantasy humor
+21,The Hound of the Baskervilles,Arthur Conan Doyle,Mystery,1902,256,Sherlock Holmes investigates a legendary hound on the moors detective deduction
+22,Murder on the Orient Express,Agatha Christie,Mystery,1934,256,Detective Poirot solves a murder on a snowbound train with many suspects
+23,And Then There Were None,Agatha Christie,Mystery,1939,272,Ten strangers on an island are killed one by one classic whodunit suspense
+24,The Girl with the Dragon Tattoo,Stieg Larsson,Mystery,2005,465,Journalist and hacker investigate a decades old disappearance crime thriller
+25,Gone Girl,Gillian Flynn,Mystery,2012,432,Wife disappears and husband becomes suspect psychological thriller marriage secrets
+26,The Big Sleep,Raymond Chandler,Mystery,1939,231,Private detective Marlowe navigates blackmail and murder in noir Los Angeles
+27,The Da Vinci Code,Dan Brown,Mystery,2003,489,Symbologist follows clues in art and history to uncover a secret conspiracy thriller
+28,In the Woods,Tana French,Mystery,2007,429,Detective investigates a child murder near woods tied to his own lost memory
+29,The Silent Patient,Alex Michaelides,Mystery,2019,336,Psychotherapist obsessed with a woman who shot her husband and stopped speaking thriller
+30,Rebecca,Daphne du Maurier,Mystery,1938,449,New wife haunted by the memory of the first wife at a gothic estate suspense
+31,Pride and Prejudice,Jane Austen,Classics,1813,432,Elizabeth Bennet and Mr Darcy overcome pride and prejudice romance society manners
+32,1984,George Orwell,Classics,1949,328,Totalitarian surveillance state thought police and rebellion dystopia politics
+33,To Kill a Mockingbird,Harper Lee,Classics,1960,281,Young girl witnesses racial injustice as her father defends a black man in court
+34,The Great Gatsby,F. Scott Fitzgerald,Classics,1925,180,Mysterious millionaire pursues lost love in the jazz age wealth and illusion
+35,Crime and Punishment,Fyodor Dostoevsky,Classics,1866,671,Poor student commits murder and struggles with guilt morality and redemption psychology
+36,Jane Eyre,Charlotte Bronte,Classics,1847,532,Orphan governess finds love and independence gothic romance and morality
+37,Brave New World,Aldous Huxley,Classics,1932,311,Engineered happiness and conditioning in a dystopian society technology control
+38,Animal Farm,George Orwell,Classics,1945,112,Farm animals revolt and power corrupts political allegory satire
+39,Frankenstein,Mary Shelley,Classics,1818,280,Scientist creates life and is haunted by his creature science ethics gothic horror
+40,The Catcher in the Rye,J.D. Salinger,Classics,1951,277,Teenager wanders New York alienation identity and coming of age
+41,One Hundred Years of Solitude,Gabriel Garcia Marquez,Classics,1967,417,Generations of a family in a magical town magical realism history love
+42,Things Fall Apart,Chinua Achebe,Classics,1958,209,Igbo leader faces colonialism and cultural change tragedy tradition
+43,The God of Small Things,Arundhati Roy,Literary Fiction,1997,340,Twins in Kerala and forbidden love caste family tragedy India
+44,The Kite Runner,Khaled Hosseini,Literary Fiction,2003,371,Friendship betrayal and redemption between two boys in Afghanistan
+45,The Alchemist,Paulo Coelho,Literary Fiction,1988,208,Shepherd boy follows his dream on a journey of destiny self discovery philosophy
+46,Life of Pi,Yann Martel,Literary Fiction,2001,319,Boy survives at sea in a lifeboat with a tiger faith survival adventure
+47,The White Tiger,Aravind Adiga,Literary Fiction,2008,276,Driver from rural India rises through corruption class satire ambition
+48,Midnight's Children,Salman Rushdie,Literary Fiction,1981,647,Children born at the hour of India's independence magical realism history
+49,Norwegian Wood,Haruki Murakami,Literary Fiction,1987,296,Student remembers love loss and grief in Tokyo coming of age melancholy
+50,Kafka on the Shore,Haruki Murakami,Literary Fiction,2002,505,Runaway boy and old man who talks to cats surreal journey magical realism
+51,The Book Thief,Markus Zusak,Literary Fiction,2005,552,Girl steals books in Nazi Germany narrated by Death war words and friendship
+52,A Thousand Splendid Suns,Khaled Hosseini,Literary Fiction,2007,372,Two women endure war and oppression in Afghanistan friendship resilience
+53,Sapiens,Yuval Noah Harari,History,2011,443,Brief history of humankind cognitive agricultural and scientific revolutions
+54,Guns Germs and Steel,Jared Diamond,History,1997,480,Geography and environment shaped the fates of human societies civilization
+55,The Discovery of India,Jawaharlal Nehru,History,1946,595,Indian history philosophy and culture written from prison national identity
+56,India After Gandhi,Ramachandra Guha,History,2007,900,History of the world's largest democracy after independence politics society
+57,The Silk Roads,Peter Frankopan,History,2015,636,New history of the world centered on trade routes connecting East and West
+58,The Diary of a Young Girl,Anne Frank,History,1947,283,Jewish girl hiding during the Holocaust war diary memoir
+59,Homo Deus,Yuval Noah Harari,History,2015,450,Future of humanity data religion artificial intelligence and immortality
+60,A Brief History of Time,Stephen Hawking,Science,1988,256,Cosmology black holes the big bang and the nature of time physics explained
+61,The Selfish Gene,Richard Dawkins,Science,1976,360,Evolution from the gene's point of view natural selection biology
+62,Cosmos,Carl Sagan,Science,1980,365,Universe exploration astronomy science history and human curiosity
+63,The Gene,Siddhartha Mukherjee,Science,2016,592,History of genetics heredity and the future of genome editing biology medicine
+64,The Emperor of All Maladies,Siddhartha Mukherjee,Science,2010,571,Biography of cancer medicine research and patients history of science
+65,Astrophysics for People in a Hurry,Neil deGrasse Tyson,Science,2017,222,Quick tour of the universe physics dark matter cosmology for beginners
+66,The Elegant Universe,Brian Greene,Science,1999,448,String theory superstrings extra dimensions and the quest for a unified physics
+67,Thinking Fast and Slow,Daniel Kahneman,Psychology,2011,499,Two systems of thinking cognitive biases decision making behavioral economics
+68,Atomic Habits,James Clear,Self Help,2018,320,Small habits compound into remarkable results behavior change productivity
+69,The Power of Habit,Charles Duhigg,Self Help,2012,371,Science of habit loops cues routines rewards productivity behavior change
+70,Deep Work,Cal Newport,Self Help,2016,296,Focused work without distraction productivity success in a distracted world
+71,Man's Search for Meaning,Viktor Frankl,Psychology,1946,165,Holocaust survivor psychiatrist finds meaning in suffering philosophy logotherapy
+72,Influence,Robert Cialdini,Psychology,1984,336,Psychology of persuasion reciprocity scarcity authority social proof marketing
+73,Wings of Fire,A.P.J. Abdul Kalam,Biography,1999,180,Autobiography of a missile scientist and president of India inspiration science
+74,Steve Jobs,Walter Isaacson,Biography,2011,656,Biography of the Apple founder innovation technology design leadership
+75,Elon Musk,Ashlee Vance,Biography,2015,392,Tesla SpaceX entrepreneur innovation engineering ambition biography
+76,The Story of My Experiments with Truth,Mahatma Gandhi,Biography,1927,480,Autobiography of Gandhi nonviolence truth India freedom struggle
+77,Becoming,Michelle Obama,Biography,2018,448,Memoir of a first lady childhood career family politics
+78,Educated,Tara Westover,Biography,2018,334,Woman raised by survivalists earns a PhD education memoir family
+79,Clean Code,Robert C. Martin,Computer Science,2008,464,Writing readable maintainable software craftsmanship programming best practices
+80,The Pragmatic Programmer,Andrew Hunt and David Thomas,Computer Science,1999,352,Practical advice for software developers career programming craftsmanship
+81,Introduction to Algorithms,Thomas H. Cormen,Computer Science,1990,1312,Algorithms data structures sorting graphs dynamic programming complexity
+82,Hands-On Machine Learning,Aurelien Geron,Computer Science,2017,856,Machine learning deep learning scikit learn tensorflow neural networks python
+83,Python Data Science Handbook,Jake VanderPlas,Computer Science,2016,548,Python numpy pandas matplotlib scikit learn data analysis machine learning
+84,Deep Learning,Ian Goodfellow,Computer Science,2016,775,Neural networks optimization convolutional recurrent models deep learning theory
+85,Designing Data-Intensive Applications,Martin Kleppmann,Computer Science,2017,616,Databases distributed systems scalability reliability data engineering
+86,Code,Charles Petzold,Computer Science,1999,400,How computers work from binary and logic gates to processors hardware software
+87,Artificial Intelligence A Modern Approach,Stuart Russell,Computer Science,1995,1132,Intelligent agents search logic planning probability machine learning AI
+88,Weapons of Math Destruction,Cathy O'Neil,Computer Science,2016,272,Big data algorithms increase inequality bias fairness ethics of data science
+89,Data Science from Scratch,Joel Grus,Computer Science,2015,330,Data science fundamentals python statistics machine learning from first principles
+90,The Signal and the Noise,Nate Silver,Science,2012,534,Prediction forecasting statistics probability why most predictions fail
+91,Freakonomics,Steven Levitt,Economics,2005,268,Economics of everyday life incentives data hidden side of everything
+92,Rich Dad Poor Dad,Robert Kiyosaki,Economics,1997,336,Personal finance money mindset investing assets and financial freedom
+93,The Wealth of Nations,Adam Smith,Economics,1776,1264,Markets division of labour free trade foundations of economics
+94,Capital in the Twenty-First Century,Thomas Piketty,Economics,2013,696,Wealth inequality history data economics capital and income distribution
+95,The Psychology of Money,Morgan Housel,Economics,2020,256,Behavior and money personal finance wealth investing psychology
+96,Zero to One,Peter Thiel,Economics,2014,224,Startups innovation monopoly building the future entrepreneurship
+97,The Lean Startup,Eric Ries,Economics,2011,336,Startups experiments validated learning product development entrepreneurship
+98,Meditations,Marcus Aurelius,Philosophy,180,254,Stoic philosophy reflections on virtue duty and self discipline
+99,The Republic,Plato,Philosophy,-375,416,Justice the ideal state philosopher kings dialogue political philosophy
+100,Beyond Good and Evil,Friedrich Nietzsche,Philosophy,1886,240,Critique of morality truth and philosophers will to power
+101,Sophie's World,Jostein Gaarder,Philosophy,1991,518,Girl receives letters teaching the history of philosophy novel mystery
+102,The Bhagavad Gita,Vyasa,Philosophy,-200,250,Dialogue on duty action devotion and the self spiritual philosophy India
+103,It,Stephen King,Horror,1986,1138,Children face a shape shifting evil clown in a small town horror friendship
+104,Dracula,Bram Stoker,Horror,1897,418,Vampire count travels to England gothic horror epistolary novel
+105,The Shining,Stephen King,Horror,1977,447,Family caretakers of an isolated haunted hotel madness horror
+106,Mexican Gothic,Silvia Moreno-Garcia,Horror,2020,301,Woman investigates a decaying mansion family secrets gothic horror mystery
+107,The Fault in Our Stars,John Green,Romance,2012,313,Two teenagers with cancer fall in love young adult romance tragedy
+108,Me Before You,Jojo Moyes,Romance,2012,369,Caregiver falls for a paralyzed man love choices romance drama
+109,Outlander,Diana Gabaldon,Romance,1991,850,Nurse travels back in time to Scotland romance history adventure
+110,The Notebook,Nicholas Sparks,Romance,1996,214,Enduring love story across decades romance memory
+111,The Hunger Games,Suzanne Collins,Young Adult,2008,374,Teen fights in a televised survival game dystopia rebellion
+112,Divergent,Veronica Roth,Young Adult,2011,487,Girl in a faction based dystopia discovers she is divergent rebellion
+113,Percy Jackson and the Lightning Thief,Rick Riordan,Young Adult,2005,377,Demigod son of Poseidon on a quest Greek mythology adventure
+114,The Maze Runner,James Dashner,Young Adult,2009,375,Boys trapped in a glade surrounded by a deadly maze dystopia mystery
+115,Wonder,R.J. Palacio,Young Adult,2012,310,Boy with facial difference starts school kindness friendship
+116,Watchmen,Alan Moore,Graphic Novel,1987,416,Retired superheroes investigate a murder cold war deconstruction graphic novel
+117,Maus,Art Spiegelman,Graphic Novel,1991,296,Holocaust survivor story told with animals graphic memoir history
+118,Persepolis,Marjane Satrapi,Graphic Novel,2000,341,Girl grows up during the Iranian revolution graphic memoir history
+119,Sandman Preludes and Nocturnes,Neil Gaiman,Graphic Novel,1989,240,Lord of dreams escapes captivity mythology fantasy horror graphic novel
+120,Gitanjali,Rabindranath Tagore,Poetry,1910,103,Song offerings spiritual devotion nature poetry Nobel prize

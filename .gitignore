@@ -1,0 +1,5 @@
+.multiagent/worktrees/
+__pycache__/
+*.pyc
+data/library.db
+.venv/
