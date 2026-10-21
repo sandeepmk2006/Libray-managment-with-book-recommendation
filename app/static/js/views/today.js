@@ -36,7 +36,7 @@ export async function renderToday(app) {
       } else {
         hourlyChart = chart($("#hourly"), {
           type: "bar",
-          data: { labels: hours.map(fmt.hour), datasets: [{ data, backgroundColor: hours.map((h) => (h === new Date().getHours() ? css("--brass") : css("--lamp"))), borderRadius: 3 }] },
+          data: { labels: hours.map(fmt.hour), datasets: [{ data, backgroundColor: hours.map((h) => (h === new Date().getHours() ? css("--brass") : css("--series-1"))), borderRadius: 3 }] },
           options: { plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { precision: 0 } } } },
         });
       }

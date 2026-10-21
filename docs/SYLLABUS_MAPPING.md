@@ -25,7 +25,7 @@ Every topic below points to the file and function that implements it, and to the
 | Manipulate | Derived columns: `duration_min`, `days_late`, `is_late`, hour, weekday, weekend flag; per-member feature tables |
 | Sort / rank | Top borrowed books (`top_books`), genre popularity ranking, Bayesian-average popularity in `recommender._fit_popular` |
 | Group / rearrange | `groupby` by department, purpose, genre, date, hour; 7×24 weekday-hour pivot (`weekday_hour`) |
-| Missing data analysis | ~7% of visit purposes are deliberately missing; per-table missing counts in `eda()["summary"]`; shown under **Insights → Usage patterns → Data quality** |
+| Missing data analysis | ~7% of visit purposes are deliberately missing; members with no ratings get mean imputation before clustering; per-table missing counts in `eda()["summary"]`; shown under **Insights → Usage patterns → Data quality** |
 | Data visualisation (various plots) | Bar, line, histogram, doughnut, heatmap, radar, scatter, ROC curve, dendrogram, force-directed network, gauges. **Insights**, **Today**, **Discover**, **Reading web** |
 
 ## Module 3 — Statistical Inference
@@ -53,7 +53,7 @@ Every topic below points to the file and function that implements it, and to the
 | Similarity & distance measures | Cosine similarity (TF-IDF content, user-user, item-item), Euclidean distance (k-means), Ward linkage distance (agglomerative) |
 | K-means clustering | `analytics.clusters()`: elbow (inertia) + silhouette to choose k, PCA projection to 2-D, auto-named reader personas |
 | Agglomerative clustering | `clusters()`: Ward linkage, silhouette, adjusted Rand index agreement with k-means, dendrogram |
-| Model evaluation | Chronological train/test split (forecast); stratified split + 5-fold CV, accuracy, precision, recall, F1, ROC-AUC, ROC curves, confusion matrices (classification); R², MAE, RMSE (regression); silhouette, ARI (clustering) |
+| Model evaluation | Chronological train/test split (forecast); stratified split + 5-fold CV, accuracy, precision, recall, F1, ROC-AUC, ROC curves, confusion matrices, class-weight balancing for the 38% minority class (classification); R², MAE, RMSE (regression); silhouette, ARI (clustering) |
 
 ## Module 5 — Recommender Systems
 

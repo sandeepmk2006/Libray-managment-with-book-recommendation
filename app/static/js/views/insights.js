@@ -10,7 +10,7 @@ const TABS = [
   ["personas", "Reader personas"],
 ];
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const palette = () => [css("--lamp"), css("--brass"), "#2d5d8a", css("--pencil"), "#7a3e65", "#5b7a2e", "#6b4f2a", "#3f4f8f"];
+const palette = () => [css("--series-1"), css("--brass"), "#2d5d8a", css("--pencil"), "#7a3e65", "#5b7a2e", "#6b4f2a", "#3f4f8f"];
 
 export async function renderInsights(app, tab = "patterns") {
   app.innerHTML = `
@@ -48,7 +48,7 @@ function patterns(el) {
     chart($("#daily"), {
       type: "line",
       data: { labels: d.daily.map((r) => fmt.date(r.date)), datasets: [
-        { label: "Visits", data: d.daily.map((r) => r.visits), borderColor: css("--lamp"), backgroundColor: css("--lamp") + "22", fill: true, pointRadius: 0, tension: 0.25 },
+        { label: "Visits", data: d.daily.map((r) => r.visits), borderColor: css("--series-1"), backgroundColor: css("--series-1") + "22", fill: true, pointRadius: 0, tension: 0.25 },
         { label: "Different readers", data: d.daily.map((r) => r.unique_members), borderColor: css("--brass"), pointRadius: 0, tension: 0.25 },
       ] },
       options: { interaction: { mode: "index", intersect: false }, scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 12 } }, y: { beginAtZero: true } } },
@@ -84,7 +84,7 @@ function heatmap(el, matrix) {
   if (!window.d3) return (el.innerHTML = `<div class="empty">Heatmap needs an internet connection.</div>`);
   const hours = d3.range(7, 22), cell = 100 / hours.length;
   const max = d3.max(matrix.flat());
-  const color = d3.scaleSequential([0, max], d3.interpolateRgb(css("--paper"), css("--lamp") === "#0a2621" ? css("--ok") : css("--lamp")));
+  const color = d3.scaleSequential([0, max], d3.interpolateRgb(css("--paper"), css("--series-1")));
   el.innerHTML = `<div style="display:grid;grid-template-columns:40px 1fr;gap:4px;font-size:12px">
     ${matrix.map((row, d) => `<span class="muted" style="align-self:center">${DAYS[d]}</span>
       <div style="display:grid;grid-template-columns:repeat(${hours.length},1fr);gap:2px">${hours.map((h) => `<div title="${DAYS[d]} ${fmt.hour(h)}: ${row[h]} arrivals" style="height:26px;border-radius:2px;background:${color(row[h])}"></div>`).join("")}</div>`).join("")}
@@ -154,7 +154,7 @@ function forecast(el) {
       data: { labels: d.next_24h.map((r) => fmt.dateTime(r.hour_iso)), datasets: [{ data: d.next_24h.map((r) => r.predicted), backgroundColor: css("--brass"), borderRadius: 3 }] },
       options: { plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 12 } }, y: { beginAtZero: true } } },
     });
-    const withCoef = d.models.find((m) => m.coefficients && Object.keys(m.coefficients).length <= 14);
+    const withCoef = d.models.find((m) => m.name === d.best && m.coefficients) || d.models.find((m) => m.coefficients);
     if (withCoef) {
       const rows = Object.entries(withCoef.coefficients).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).slice(0, 8);
       $("#coef").innerHTML = `<h3 style="margin-top:16px">${esc(withCoef.name)} coefficients</h3>${barList(rows, { label: (r) => r[0].replace(/_/g, " "), value: (r) => Math.abs(r[1]), display: (v) => fmt.n(v, 2) })}`;
@@ -247,7 +247,7 @@ function personas(el) {
     });
     chart($("#elbow"), {
       data: { labels: d.elbow.map((r) => r.k), datasets: [
-        { type: "line", label: "Inertia (lower is tighter)", data: d.elbow.map((r) => r.inertia), borderColor: css("--lamp"), yAxisID: "y" },
+        { type: "line", label: "Inertia (lower is tighter)", data: d.elbow.map((r) => r.inertia), borderColor: css("--series-1"), yAxisID: "y" },
         { type: "bar", label: "Silhouette (higher is better)", data: d.elbow.map((r) => r.silhouette), backgroundColor: d.elbow.map((r) => (r.k === d.chosen_k ? css("--brass") : css("--rule"))), yAxisID: "y1" },
       ] },
       options: { scales: { x: { title: { display: true, text: "k" } }, y: { position: "left" }, y1: { position: "right", grid: { display: false }, beginAtZero: true } } },
@@ -264,7 +264,7 @@ function dendrogram(el, dg) {
   const y = d3.scaleLinear([0, d3.max(ys)], [height - m.b, m.t]);
   const svg = d3.select(el).append("svg").attr("width", width).attr("height", height);
   svg.append("g").selectAll("path").data(dg.icoord.map((ic, i) => ic.map((xv, j) => [x(xv), y(dg.dcoord[i][j])])))
-    .join("path").attr("d", d3.line()).attr("fill", "none").attr("stroke", css("--lamp") === "#0a2621" ? css("--ok") : css("--lamp")).attr("stroke-width", 1.4);
+    .join("path").attr("d", d3.line()).attr("fill", "none").attr("stroke", css("--series-1")).attr("stroke-width", 1.4);
   svg.append("g").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5)).attr("color", css("--ink-soft"));
   const labels = dg.labels || dg.ivl || [];
   svg.append("g").selectAll("text").data(labels).join("text")

@@ -54,7 +54,7 @@ export async function renderTrust(app) {
       data: {
         labels: groups.map(([g]) => (g === "F" ? "Women" : "Men")),
         datasets: [
-          { label: "Predicted on time", data: groups.map(([, v]) => v.favourable_rate), backgroundColor: css("--lamp") },
+          { label: "Predicted on time", data: groups.map(([, v]) => v.favourable_rate), backgroundColor: css("--series-1") },
           { label: "Caught real late returns", data: groups.map(([, v]) => v.true_positive_rate), backgroundColor: css("--brass") },
           { label: "Accuracy", data: groups.map(([, v]) => v.accuracy), backgroundColor: "#2d5d8a" },
         ],

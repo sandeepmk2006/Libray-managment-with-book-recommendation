@@ -101,7 +101,7 @@ export async function renderDiscover(app, memberId) {
       </div>
       <p class="muted" style="font-size:13px">${esc(ev.protocol)} ${ev.users_evaluated} members tested. Highlighted row ranks best on NDCG. Variety is the average dissimilarity between books in one list; RMSE is the rating prediction error, where the approach predicts ratings.</p>`;
     const metrics = ["precision", "recall", "ndcg", "hit_rate"];
-    const colors = [css("--lamp"), css("--brass"), "#2d5d8a", css("--pencil")];
+    const colors = [css("--series-1"), css("--brass"), "#2d5d8a", css("--pencil")];
     chart($("#eval-chart"), {
       type: "bar",
       data: { labels: rows.map(([k]) => names[k]), datasets: metrics.map((m, i) => ({ label: m.replace("_", " "), data: rows.map(([, v]) => v[m]), backgroundColor: colors[i], borderRadius: 2 })) },
