@@ -219,7 +219,7 @@ tr.best td { background: color-mix(in srgb, var(--brass-soft) 60%, transparent);
 
 /* hypothesis cards */
 .test { border-left: 3px solid var(--rule); padding: 4px 0 4px 16px; }
-.test.reject { border-color: var(--pencil); }
+.test.reject { border-left-color: var(--pencil); }
 .test dl { display: grid; grid-template-columns: 34px 1fr; gap: 2px 8px; margin: 10px 0; font-size: 13.5px; }
 .test dt { font-weight: 700; color: var(--ink-soft); }
 .test dd { margin: 0; }

@@ -794,7 +794,7 @@ def classify(frames: dict) -> dict:
     results = []
 
     # Logistic Regression
-    log_reg = LogisticRegression(random_state=42, max_iter=1000, solver="lbfgs")
+    log_reg = LogisticRegression(random_state=42, max_iter=1000, solver="lbfgs", class_weight="balanced")
     log_reg.fit(X_train_sc, y_train)
     models["Logistic Regression"] = (log_reg, X_test_sc)
 
@@ -812,16 +812,16 @@ def classify(frames: dict) -> dict:
     # Decision Tree (tune max_depth)
     best_depth, best_dt_score = 3, 0
     for d in range(2, 11):
-        dt_temp = DecisionTreeClassifier(max_depth=d, random_state=42)
+        dt_temp = DecisionTreeClassifier(max_depth=d, random_state=42, class_weight="balanced")
         sc = cross_val_score(dt_temp, X_train, y_train, cv=cv, scoring="accuracy").mean()
         if sc > best_dt_score:
             best_depth, best_dt_score = d, sc
-    dt = DecisionTreeClassifier(max_depth=best_depth, random_state=42)
+    dt = DecisionTreeClassifier(max_depth=best_depth, random_state=42, class_weight="balanced")
     dt.fit(X_train, y_train)
     models["Decision Tree"] = (dt, X_test)
 
     # Random Forest
-    rf = RandomForestClassifier(n_estimators=100, max_depth=best_depth + 2,
+    rf = RandomForestClassifier(class_weight="balanced", n_estimators=100, max_depth=best_depth + 2,
                                 random_state=42, n_jobs=-1)
     rf.fit(X_train, y_train)
     models["Random Forest"] = (rf, X_test)
@@ -893,7 +893,7 @@ def predict_late(frames: dict, member_id, book_id) -> dict:
         X, y, feature_cols, returned = _build_classification_features(frames)
         scaler = StandardScaler()
         X_sc = scaler.fit_transform(X)
-        model = LogisticRegression(random_state=42, max_iter=1000, solver="lbfgs")
+        model = LogisticRegression(random_state=42, max_iter=1000, solver="lbfgs", class_weight="balanced")
         model.fit(X_sc, y)
         _predict_cache[cache_key] = (model, scaler, feature_cols, frames)
 
@@ -1023,6 +1023,10 @@ def clusters(frames: dict) -> dict:
 
     feature_names = ["visits_per_week", "avg_stay", "loans", "late_rate",
                      "avg_rating", "genre_diversity", "mean_entry_hour", "weekend_share"]
+    # members who never rated / returned anything have no opinion or lateness record:
+    # impute those with the population mean instead of 0 so they aren't read as "harsh" or "punctual"
+    for f in ("avg_rating", "late_rate"):
+        mf[f] = mf[f].fillna(mf[f].mean())
     for f in feature_names:
         mf[f] = mf[f].fillna(0)
 
@@ -1034,13 +1038,14 @@ def clusters(frames: dict) -> dict:
 
     # Elbow + silhouette for k=2..8
     elbow = []
-    best_k, best_sil = 2, -1
+    best_k, best_sil = 3, -1
     for k in range(2, 9):
         km = KMeans(n_clusters=k, random_state=42, n_init=10)
         labels = km.fit_predict(X_sc)
         sil = float(silhouette_score(X_sc, labels))
         elbow.append({"k": k, "inertia": float(km.inertia_), "silhouette": sil})
-        if sil > best_sil:
+        # k=2 only splits members into "more" and "less"; require at least 3 personas
+        if k >= 3 and sil > best_sil:
             best_k, best_sil = k, sil
 
     # Final KMeans

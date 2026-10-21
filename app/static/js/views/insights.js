@@ -118,7 +118,7 @@ function tests(el) {
       const span = c.high - c.low || 1, pad = span * 0.6, lo = c.low - pad, hi = c.high + pad;
       const x = (v) => ((v - lo) / (hi - lo)) * 100;
       return `<div style="display:grid;grid-template-columns:minmax(120px,220px) 1fr 180px;gap:14px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--rule)">
-        <span>${esc(c.metric)}</span>
+        <span>${esc({ mean_stay_min: "Average stay (minutes)", mean_rating: "Average book rating", late_rate: "Share of late returns" }[c.metric] || c.metric)}</span>
         <div style="position:relative;height:18px"><div style="position:absolute;top:8px;left:${x(c.low)}%;width:${x(c.high) - x(c.low)}%;height:3px;background:var(--brass)"></div>
           <div style="position:absolute;top:3px;left:calc(${x(c.mean)}% - 6px);width:12px;height:12px;border-radius:50%;background:var(--lamp);border:2px solid var(--sheet)"></div></div>
         <span class="num muted">${fmt.n(c.mean, 3)} <small>[${fmt.n(c.low, 3)}, ${fmt.n(c.high, 3)}]</small></span></div>`;
