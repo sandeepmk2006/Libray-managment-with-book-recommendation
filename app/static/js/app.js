@@ -1,0 +1,10 @@
+import { $, toast } from './ui.js';
+import { renderOverview } from './dashboard.js'; import { renderGate } from './gate.js'; import { renderInsights } from './analytics.js'; import { renderDiscover } from './recommend.js'; import { renderCatalog } from './catalog.js'; import { renderMembers } from './members.js'; import { renderNetwork } from './graph.js'; import { renderTrust } from './ethics.js';
+const routes={'/':renderOverview,'/gate':renderGate,'/insights':renderInsights,'/discover':renderDiscover,'/catalog':renderCatalog,'/members':renderMembers,'/network':renderNetwork,'/trust':renderTrust};
+const titles={'/':'Overview','/gate':'Gate desk','/insights':'Insights','/discover':'Discover','/catalog':'Catalog','/members':'Members','/network':'Network','/trust':'Trust'};
+export async function route(){ const raw=location.hash.slice(1)||'/'; const pathname=raw.split('?')[0]; const base=pathname.startsWith('/members/')?'/members':(Object.keys(routes).find(x=>pathname===x)||'/'); document.querySelectorAll('.nav-link').forEach(a=>a.classList.toggle('active',a.dataset.route===base)); $('#breadcrumb').textContent=titles[base]; $('#app').innerHTML='<div class="skeleton" style="height:100px"></div>'; try{await routes[base](raw)}catch(e){$('#app').innerHTML=`<div class="error"><strong>Something went wrong</strong>${e.message}</div>`;} }
+window.addEventListener('hashchange',route); window.addEventListener('DOMContentLoaded',route);
+$('#theme-toggle').addEventListener('click',()=>{document.documentElement.classList.toggle('dark'); $('#theme-toggle').textContent=document.documentElement.classList.contains('dark')?'☀':'☾';});
+$('#mobile-menu').addEventListener('click',()=>document.querySelector('.sidebar').classList.toggle('open'));
+$('#global-search').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.value.trim()){location.hash=`/catalog?q=${encodeURIComponent(e.target.value.trim())}`;}});
+document.addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();$('#global-search').focus();} if(e.key.toLowerCase()==='g'&&document.activeElement.tagName!=='INPUT')location.hash='/gate';});
