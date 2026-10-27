@@ -4,6 +4,5 @@
 .multiagent/worktrees/
 .playwright-mcp/
 .venv/
-Syllabus.pdf
 __pycache__/
 data/library.db
