@@ -4,6 +4,7 @@ import { $, chart, css, esc, fmt, genreColor, load, memberPicker } from "../ui.j
 import { bookCard, openBook } from "./catalog.js";
 
 const METHODS = [
+  ["context", "Fits your visits", "Our method: the best blend, re-weighted by how long this reader usually stays at the library — long-stayers get longer books, quick visitors shorter reads."],
   ["hybrid", "Best blend", "Mixes every approach below, then spreads picks across themes so the list isn't ten copies of one idea."],
   ["content", "Similar books", "Matches the words, themes and genres of what this reader already enjoyed."],
   ["user_cf", "Readers like them", "Finds members with overlapping ratings and borrows their favourites."],
@@ -13,7 +14,7 @@ const METHODS = [
 ];
 
 export async function renderDiscover(app, memberId) {
-  let method = "hybrid";
+  let method = "context";
   let current = memberId || null;
   app.innerHTML = `
     <h1 class="title">Discover</h1>

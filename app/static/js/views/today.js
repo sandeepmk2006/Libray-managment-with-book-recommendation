@@ -12,6 +12,8 @@ export async function renderToday(app) {
     <div class="grid g-wide">
       <section class="panel"><h2>Arrivals by hour <small id="busiest"></small></h2><div class="chart-box"><canvas id="hourly"></canvas></div></section>
       <section class="panel"><h2>In the building now <small id="inside-count"></small></h2><div id="inside" style="max-height:260px;overflow:auto">${skeleton(200)}</div></section>
+      <section class="panel span-2" style="grid-column:1/-1"><h2>Expected crowd today <small id="occ-note"></small></h2>
+        <div id="occ-alerts"></div><div class="chart-box short"><canvas id="occ"></canvas></div></section>
       <section class="panel span-2" style="grid-column:1/-1"><h2>Gate activity</h2><ul class="feed" id="feed">${skeleton(160)}</ul></section>
     </div>`;
 
@@ -59,6 +61,22 @@ export async function renderToday(app) {
     const row = e.target.closest("tr[data-id]");
     if (row) location.hash = `#/members/${row.dataset.id}`;
   });
+  // occupancy forecast: predicted arrivals x how long people stay
+  api.occupancy().then((f) => {
+    $("#occ-note").textContent = `${f.model} for arrivals, typical stay ${Math.round(f.median_stay_min)} min, ${f.capacity} seats`;
+    $("#occ-alerts").innerHTML = f.alerts.length
+      ? f.alerts.map((a) => `<p class="badge warn" style="display:block;margin:0 0 8px;font-weight:500">${esc(a)}</p>`).join("")
+      : `<p class="muted" style="margin-top:0">No crowding expected in the coming hours.</p>`;
+    chart($("#occ"), {
+      type: "line",
+      data: { labels: f.hours.map((h) => fmt.hour(+h.hour_iso.slice(11, 13))), datasets: [
+        { label: "Predicted readers inside", data: f.hours.map((h) => h.predicted_inside), borderColor: css("--brass"), backgroundColor: css("--brass") + "30", fill: true, tension: 0.3 },
+        { label: "Seats", data: f.hours.map(() => f.capacity), borderColor: css("--pencil"), borderDash: [5, 5], pointRadius: 0 },
+      ] },
+      options: { scales: { x: { grid: { display: false } }, y: { beginAtZero: true } } },
+    });
+  }).catch((e) => { $("#occ-alerts").innerHTML = `<div class="error-box">${esc(e.message)}</div>`; });
+
   await refresh();
   const timer = setInterval(refresh, 10000);
   return () => clearInterval(timer);

@@ -27,6 +27,8 @@ DEPARTMENTS = {
     "HISTORY": (0.06, {"History": 2.4, "Philosophy": 1.4, "Biography": 1.0, "Classics": 0.8, "Graphic Novel": 0.6}),
     "FACULTY": (0.05, {"History": 1.0, "Science": 1.0, "Philosophy": 1.0, "Computer Science": 1.0, "Classics": 0.8}),
 }
+BOOK_COLUMNS = ["book_id", "title", "author", "genre", "year", "pages", "description",
+                "ol_key", "ol_rating", "want_to_read"]
 PURPOSES = ["Study", "Borrow/Return", "Research", "Group Discussion", "Reading", "Exam Prep"]
 FIRST = ["Aarav", "Diya", "Vihaan", "Ananya", "Arjun", "Ishita", "Sai", "Meera", "Rohan", "Kavya",
          "Aditya", "Nila", "Karthik", "Sneha", "Rahul", "Priya", "Joel", "Fathima", "Nikhil", "Riya",
@@ -47,16 +49,26 @@ def _softmax(x):
     return e / e.sum()
 
 
-def generate(n_members=320, days=120, seed=42, now=None):
+def generate(n_members=600, days=120, seed=42, now=None):
     rng = np.random.default_rng(seed)
     now = (now or datetime.now()).replace(second=0, microsecond=0)
     start = (now - timedelta(days=days)).replace(hour=0, minute=0)
 
-    books = pd.read_csv(os.path.join(ROOT, "data", "books.csv"))
+    # prefer the web-scraped Open Library catalogue (python -m app.scraper); fall back to the curated list
+    scraped = os.path.join(ROOT, "data", "books_scraped.csv")
+    books = pd.read_csv(scraped if os.path.exists(scraped) else os.path.join(ROOT, "data", "books.csv"))
+    books = books[[c for c in BOOK_COLUMNS if c in books.columns]]
     books["copies"] = rng.integers(2, 6, len(books))
     genres = sorted(books["genre"].unique())
     g_idx = {g: i for i, g in enumerate(genres)}
-    popularity = rng.lognormal(0, 0.6, len(books))  # some books are simply more popular
+    if "want_to_read" in books:
+        # real-world demand: Open Library "want to read" counts, damped so classics don't dominate
+        wtr = books["want_to_read"].fillna(books["want_to_read"].median()).to_numpy(float)
+        popularity = np.sqrt(wtr / np.median(wtr)) * rng.lognormal(0, 0.25, len(books))
+        quality = (books["ol_rating"].fillna(books["ol_rating"].mean()).to_numpy(float) - 4.0)
+    else:
+        popularity = rng.lognormal(0, 0.6, len(books))  # some books are simply more popular
+        quality = np.zeros(len(books))
 
     # ---------------- members with latent traits ----------------
     dept_names = list(DEPARTMENTS)
@@ -122,11 +134,15 @@ def generate(n_members=320, days=120, seed=42, now=None):
     # ---------------- loans + ratings ----------------
     loans, ratings = [], {}
     genre_of = books["genre"].map(g_idx).to_numpy()
+    log_pages = np.log(books["pages"].clip(60, 1500).to_numpy(float))
     for m, t in zip(members, traits):
         n_loans = rng.poisson(t["reader"] * days / 30)
         if n_loans == 0:
             continue
-        logits = t["taste"][genre_of] * 1.3 + np.log(popularity)
+        # behavioural assumption: members who settle in for long visits pick longer books
+        pref_log_pages = np.log(300) + 1.6 * (t["stay_mu"] - np.log(75))
+        logits = (t["taste"][genre_of] * 1.3 + np.log(popularity)
+                  - 1.4 * np.abs(log_pages - pref_log_pages))
         p = _softmax(logits)
         chosen = rng.choice(len(books), size=min(n_loans, len(books) // 2), replace=False, p=p)
         for bi in chosen:
@@ -147,7 +163,7 @@ def generate(n_members=320, days=120, seed=42, now=None):
             })
             if ret <= now and rng.random() < 0.85:
                 aff = t["taste"][genre_of[bi]]
-                r = 2.5 + 0.8 * aff + 0.25 * np.log(popularity[bi]) + rng.normal(0, 0.6)
+                r = 2.5 + 0.8 * aff + 0.25 * np.log(popularity[bi]) + 0.6 * quality[bi] + rng.normal(0, 0.6)
                 ratings[(m["member_id"], int(books.book_id[bi]))] = {
                     "member_id": m["member_id"], "book_id": int(books.book_id[bi]),
                     "rating": float(np.clip(np.round(r * 2) / 2, 1, 5)),
@@ -175,7 +191,7 @@ def seed_database(path=None, **kw):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--members", type=int, default=320)
+    ap.add_argument("--members", type=int, default=600)
     ap.add_argument("--days", type=int, default=120)
     ap.add_argument("--seed", type=int, default=42)
     a = ap.parse_args()

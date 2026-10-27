@@ -1,6 +1,9 @@
-.multiagent/worktrees/
-__pycache__/
+!docs/*.docx
+*.docx
 *.pyc
-data/library.db
-.venv/
+.multiagent/worktrees/
 .playwright-mcp/
+.venv/
+Syllabus.pdf
+__pycache__/
+data/library.db

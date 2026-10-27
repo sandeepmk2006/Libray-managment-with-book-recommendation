@@ -1120,3 +1120,37 @@ def clusters(frames: dict) -> dict:
             },
         },
     })
+
+
+# ============================================================================
+# Occupancy forecast (Module 4 regression applied to a real-time decision)
+# ============================================================================
+def occupancy_forecast(frames: dict, inside_now: int, capacity: int, forecast_result: dict = None) -> dict:
+    """Predict how many people will be INSIDE each coming hour, and raise alerts.
+
+    occupancy(h) = inside_now * S(h) + sum_j arrivals(j) * S(h - j + 0.5)
+    where arrivals come from the best footfall regression and S(t) is the empirical
+    survival function of stay length (share of visits still going after t hours).
+    """
+    fc = forecast_result or forecast(frames)
+    stays_h = frames["visits"]["duration_min"].dropna().to_numpy() / 60.0
+    surv = lambda t: float((stays_h > t).mean()) if t >= 0 else 1.0
+
+    arrivals = [(pd.Timestamp(r["hour_iso"]), r["predicted"]) for r in fc["next_24h"]]
+    out = []
+    for k, (ts, _) in enumerate(arrivals):
+        hours_from_now = (ts - arrivals[0][0]).total_seconds() / 3600 + 0.5
+        occ = inside_now * surv(hours_from_now)
+        for j, (tj, a) in enumerate(arrivals[: k + 1]):
+            occ += a * surv((ts - tj).total_seconds() / 3600 + 0.5)
+        share = occ / capacity
+        level = "full" if share >= 0.9 else "busy" if share >= 0.7 else "comfortable"
+        out.append({"hour_iso": ts.isoformat(), "predicted_inside": round(occ, 1),
+                    "share": round(share, 3), "level": level})
+    peak = max(out, key=lambda r: r["predicted_inside"]) if out else None
+    alerts = [f"Expect about {int(r['predicted_inside'])} readers at {r['hour_iso'][11:16]} "
+              f"({int(r['share'] * 100)}% of seats): {'open the overflow hall' if r['level'] == 'full' else 'add a desk assistant'}."
+              for r in out if r["level"] != "comfortable"]
+    return _clean({"capacity": capacity, "inside_now": inside_now, "model": fc["best"],
+                   "median_stay_min": float(np.median(stays_h) * 60) if len(stays_h) else None,
+                   "hours": out, "peak": peak, "alerts": alerts[:4]})

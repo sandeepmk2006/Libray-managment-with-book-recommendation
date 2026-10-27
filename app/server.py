@@ -12,7 +12,7 @@ from .db import DB_PATH, connect, init_schema, load_frames
 from .recommender import METHODS, Recommender, evaluate, interactions_from
 
 STATIC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
-CAPACITY = 150
+CAPACITY = 60   # reading-room seats
 
 
 class State:
@@ -45,8 +45,8 @@ class State:
     def recommender(self):
         def build():
             f = self.frames()
-            return Recommender(f["books"], f["members"], interactions_from(f))
-        return self.memo("rec", build, ttl_versions=20)  # retraining is ~3s, tolerate a few writes
+            return Recommender(f["books"], f["members"], interactions_from(f), f["visits"])
+        return self.memo("rec", build, ttl_versions=200)  # gate scans bump the version too; retrain after many writes
 
 
 def now_iso():
@@ -79,6 +79,16 @@ def create_app(db_path=None):
     q = lambda sql, *a: [dict(r) for r in st.conn.execute(sql, a).fetchall()]
     ok = lambda o: jsonify(clean(o))
     err = lambda msg, code=400: (jsonify({"error": msg}), code)
+
+    # warm the models in the background so the first page loads quickly
+    def _warm():
+        from . import analytics
+        st.recommender()
+        st.memo("rec_eval", lambda: evaluate(st.frames()), ttl_versions=10**9)
+        for name in ("eda", "forecast", "hypothesis", "classify", "clusters"):
+            st.memo(f"an_{name}", lambda n=name: getattr(analytics, n)(st.frames()), ttl_versions=50)
+    if not app.testing and os.environ.get("ATHENAEUM_NO_WARMUP") != "1":
+        threading.Thread(target=_warm, daemon=True).start()
 
     # one shared SQLite connection: serialise API requests touching it
     @app.before_request
@@ -325,6 +335,13 @@ def create_app(db_path=None):
 
     for _name in ("eda", "hypothesis", "forecast", "classify", "clusters"):
         app.add_url_rule(f"/api/analytics/{_name}", f"an_{_name}", lambda _n=_name: analytic(_n))
+
+    @app.get("/api/occupancy/forecast")
+    def occupancy():
+        from . import analytics
+        inside = st.conn.execute("SELECT COUNT(*) FROM visits WHERE exit_time IS NULL").fetchone()[0]
+        fc = st.memo("an_forecast", lambda: analytics.forecast(st.frames()), ttl_versions=50)
+        return ok(analytics.occupancy_forecast(st.frames(), inside, CAPACITY, fc))
 
     @app.post("/api/analytics/predict_late")
     def predict_late():

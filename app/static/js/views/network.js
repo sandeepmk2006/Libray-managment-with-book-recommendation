@@ -8,8 +8,8 @@ export async function renderNetwork(app) {
     <h1 class="title">Reading web</h1>
     <p class="lede">Two books are linked when the same readers borrowed both. Thicker lines mean more shared readers; bigger circles are borrowed more often. Drag to rearrange, scroll to zoom, click a book to open it.</p>
     <div class="row" style="margin-bottom:14px;justify-content:space-between">
-      <label class="field" style="display:block">Show links shared by at least <output id="w-out">8</output> readers
-        <input id="weight" type="range" min="3" max="14" value="8" style="width:220px;display:block;margin-top:6px"></label>
+      <label class="field" style="display:block">Show links shared by at least <output id="w-out">3</output> readers
+        <input id="weight" type="range" min="2" max="8" value="3" style="width:220px;display:block;margin-top:6px"></label>
       <button class="btn ghost" id="cypher" type="button">Copy as Neo4j Cypher</button>
     </div>
     <div class="network" id="net"></div>
@@ -88,6 +88,6 @@ export async function renderNetwork(app) {
       toast(`Copied ${text.split("\n").length} Cypher lines. Paste them into Neo4j Browser.`);
     } catch (e) { toast(`Couldn't copy: ${e.message}`, true); }
   });
-  await draw(8);
+  await draw(3);
   return () => sim && sim.stop();
 }

@@ -2,6 +2,8 @@ import json
 import os
 import tempfile
 
+os.environ["ATHENAEUM_NO_WARMUP"] = "1"
+
 import pytest
 
 from app.seed import seed_database
@@ -56,7 +58,7 @@ def test_loan_cycle(client):
     assert client.post(f"/api/loans/{lid}/return").status_code == 404
 
 
-@pytest.mark.parametrize("method", ["hybrid", "content", "user_cf", "item_cf", "svd", "popular"])
+@pytest.mark.parametrize("method", ["context", "hybrid", "content", "user_cf", "item_cf", "svd", "popular"])
 def test_recommend(client, method):
     mid = get(client, "/api/members?limit=10")[5]["member_id"]
     d = get(client, f"/api/recommend/{mid}?method={method}&k=5")
@@ -66,10 +68,16 @@ def test_recommend(client, method):
 
 def test_recommend_evaluate_graph_ethics(client):
     ev = get(client, "/api/recommend/evaluate")
-    assert set(ev["methods"]) == {"hybrid", "content", "user_cf", "item_cf", "svd", "popular"}
+    assert set(ev["methods"]) == {"context", "hybrid", "content", "user_cf", "item_cf", "svd", "popular"}
     g = get(client, "/api/graph/books?min_weight=1")
     assert g["nodes"] and g["links"]
     assert "MERGE" in client.get("/api/graph/cypher").get_data(as_text=True)
     e = get(client, "/api/ethics/report")
     assert {"anonymised_sample", "k_anonymity", "consent", "fairness", "transparency"} <= e.keys()
     json.dumps(e, allow_nan=False)
+
+
+def test_occupancy_forecast(client):
+    d = get(client, "/api/occupancy/forecast")
+    assert d["hours"] and {"predicted_inside", "share", "level"} <= d["hours"][0].keys()
+    assert all(h["predicted_inside"] >= 0 for h in d["hours"])

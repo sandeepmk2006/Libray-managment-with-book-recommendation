@@ -66,6 +66,7 @@ export function css(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 export function chart(canvas, config) {
+  if (!canvas || !canvas.isConnected) return null; // view changed before the data arrived
   if (!window.Chart) {
     canvas.parentElement.innerHTML = `<div class="empty">Charts need an internet connection to load.</div>`;
     return null;

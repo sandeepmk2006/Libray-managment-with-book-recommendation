@@ -10,6 +10,11 @@ item_cf  : item-item collaborative filtering (adjusted cosine)
 svd      : latent-factor matrix factorisation with biases trained by SGD (Funk SVD)
 hybrid   : weighted blend of normalised scores + MMR re-ranking for diversity,
            with a cold-start fallback for members with no history
+context  : gate-context-aware hybrid (this project's proposed method). Learns, from the
+           gate log, how a member's typical visit length relates to the length of books
+           they borrow, then re-weights the hybrid score by how well each book's length
+           fits the member's predicted reading capacity. Works even for new members who
+           have visited but never borrowed.
 
 Interactions: explicit ratings (1-5); a borrow without a rating counts as an
 implicit 3.5. Members who opted out of personalisation get `popular` only.
@@ -21,7 +26,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 IMPLICIT_RATING = 3.5
 HYBRID_WEIGHTS = {"content": 0.55, "item_cf": 0.15, "user_cf": 0.15, "svd": 0.05, "popular": 0.10}  # tuned on hold-out NDCG
-METHODS = ["hybrid", "content", "user_cf", "item_cf", "svd", "popular"]
+METHODS = ["context", "hybrid", "content", "user_cf", "item_cf", "svd", "popular"]
+CONTEXT_STRENGTH = 0.3   # share of the final score decided by length fit (chosen on a validation split)
 
 
 def interactions_from(frames):
@@ -40,7 +46,7 @@ def _minmax(x):
 
 
 class Recommender:
-    def __init__(self, books, members, interactions, n_factors=12, epochs=60, seed=42):
+    def __init__(self, books, members, interactions, visits=None, n_factors=12, epochs=60, seed=42):
         self.books = books.reset_index(drop=True)
         self.members = members.set_index("member_id")
         self.book_ids = self.books["book_id"].to_numpy()
@@ -63,6 +69,7 @@ class Recommender:
         self._fit_svd(n_factors, epochs, seed)
         self._fit_popular()
         self._fit_dept_taste(interactions)
+        self._fit_context(visits)
 
     # ---------------- training ----------------
     def _fit_content(self):
@@ -81,7 +88,9 @@ class Recommender:
         self.item_sim = cosine_similarity(centred.T)
         np.fill_diagonal(self.item_sim, 0)
 
-    def _fit_svd(self, k, epochs, seed, lr=0.01, reg=0.05):
+    def _fit_svd(self, k, epochs, seed, lr=0.3, reg=0.05, iters=400):
+        """Funk SVD with biases, trained by vectorised full-batch gradient descent
+        on the observed ratings only (minimises squared error + L2 penalty)."""
         rng = np.random.default_rng(seed)
         nu, nb = self.R.shape
         self.P = rng.normal(0, 0.1, (nu, k))
@@ -90,15 +99,18 @@ class Recommender:
         self.bi = np.zeros(nb)
         us, its = np.nonzero(self.mask)
         rs = self.R[us, its]
-        for _ in range(epochs):
-            for j in rng.permutation(len(rs)):
-                u, i = us[j], its[j]
-                err = rs[j] - (self.global_mean + self.bu[u] + self.bi[i] + self.P[u] @ self.Q[i])
-                self.bu[u] += lr * (err - reg * self.bu[u])
-                self.bi[i] += lr * (err - reg * self.bi[i])
-                pu = self.P[u].copy()
-                self.P[u] += lr * (err * self.Q[i] - reg * pu)
-                self.Q[i] += lr * (err * pu - reg * self.Q[i])
+        cu = np.maximum(np.bincount(us, minlength=nu), 1)[:, None]   # per-user / per-item step scaling
+        ci = np.maximum(np.bincount(its, minlength=nb), 1)[:, None]
+        for _ in range(iters):
+            err = rs - (self.global_mean + self.bu[us] + self.bi[its] + (self.P[us] * self.Q[its]).sum(1))
+            g_bu = np.bincount(us, err, nu) - reg * self.bu
+            g_bi = np.bincount(its, err, nb) - reg * self.bi
+            g_P = np.zeros_like(self.P); np.add.at(g_P, us, err[:, None] * self.Q[its])
+            g_Q = np.zeros_like(self.Q); np.add.at(g_Q, its, err[:, None] * self.P[us])
+            self.bu += lr * g_bu / cu[:, 0]
+            self.bi += lr * g_bi / ci[:, 0]
+            self.P += lr * (g_P / cu - reg * self.P)
+            self.Q += lr * (g_Q / ci - reg * self.Q)
 
     def _fit_popular(self, m=5):
         n = self.mask.sum(0)
@@ -117,6 +129,41 @@ class Recommender:
                 if b in self.bidx:
                     v[self.bidx[b]] = c
             self.dept_scores[dept] = _minmax(np.log1p(v))
+
+    def _fit_context(self, visits):
+        """Gate context: regress log(mean pages borrowed) on log(typical stay minutes)."""
+        self.stay = {}
+        self.ctx_coef = None
+        self.log_pages = np.log(self.books["pages"].clip(60, 1500).to_numpy(float))
+        if visits is None or not len(visits):
+            return
+        closed = visits.dropna(subset=["duration_min"])
+        self.stay = closed.groupby("member_id")["duration_min"].median().to_dict()
+        xs, ys = [], []
+        for m, u in self.uidx.items():
+            read = np.nonzero(self.mask[u])[0]
+            if len(read) >= 2 and m in self.stay:
+                xs.append(np.log(self.stay[m]))
+                ys.append(self.log_pages[read].mean())
+        if len(xs) >= 10:
+            slope, intercept = np.polyfit(xs, ys, 1)
+            resid = np.array(ys) - (slope * np.array(xs) + intercept)
+            self.ctx_coef = (float(slope), float(intercept), float(max(resid.std(), 0.25)))
+            self.ctx_r = float(np.corrcoef(xs, ys)[0, 1])
+
+    def predicted_pages(self, member_id):
+        if self.ctx_coef is None or member_id not in self.stay:
+            return None
+        slope, intercept, _ = self.ctx_coef
+        return float(np.exp(slope * np.log(self.stay[member_id]) + intercept))
+
+    def length_fit(self, member_id):
+        """Gaussian fit (0..1) of every book's log-length to the member's predicted length."""
+        p = self.predicted_pages(member_id)
+        if p is None:
+            return None
+        sd = self.ctx_coef[2]
+        return np.exp(-((self.log_pages - np.log(p)) ** 2) / (2 * (1.5 * sd) ** 2))
 
     # ---------------- per-method scoring (full catalogue vector) ----------------
     def predict_rating(self, method, u, i):
@@ -158,6 +205,10 @@ class Recommender:
             return _minmax(self.bi + self.P[u] @ self.Q.T)
         if method == "hybrid":
             return sum(w * self.scores(m, u) for m, w in HYBRID_WEIGHTS.items())
+        if method == "context":
+            base = self.scores("hybrid", u)
+            fit = self.length_fit(self.users[u])
+            return base if fit is None else base * ((1 - CONTEXT_STRENGTH) + CONTEXT_STRENGTH * fit)
         raise ValueError(f"unknown method {method}")
 
     # ---------------- public API ----------------
@@ -171,6 +222,9 @@ class Recommender:
             dept = member["department"] if member is not None else None
             base = self.dept_scores.get(dept, np.zeros(len(self.book_ids)))
             s = 0.6 * base + 0.4 * self.pop_score
+            fit = self.length_fit(member_id) if method == "context" else None
+            if fit is not None:  # visited but never borrowed: the gate log still personalises
+                s = s * ((1 - CONTEXT_STRENGTH) + CONTEXT_STRENGTH * fit)
             seen = np.zeros(len(self.book_ids), bool)
             u = None
         else:
@@ -182,7 +236,7 @@ class Recommender:
                 seen[self.bidx[b]] = True
         s = np.where(seen, -np.inf, s)
 
-        if diversify and method == "hybrid":
+        if diversify and method in ("hybrid", "context"):
             order = self._mmr(s, k)
         else:
             order = [i for i in np.argsort(-s) if np.isfinite(s[i])][:k]
@@ -191,7 +245,7 @@ class Recommender:
         items = [{
             "book": self._book(i),
             "score": round(float(norm[j]), 4),
-            "reasons": self._reasons(u, i, method, member, cold),
+            "reasons": self._reasons(u, i, method, member, cold, member_id),
         } for j, i in enumerate(order)]
         return {"member_id": member_id, "method": method, "cold_start": cold, "items": items}
 
@@ -241,9 +295,13 @@ class Recommender:
         idx = [t for t in np.argsort(-both)[:n * 4] if both[t] > 0 and not set(vocab[t].split()) & genre_words]
         return [vocab[t] for t in idx[:n]]
 
-    def _reasons(self, u, i, method, member, cold):
+    def _reasons(self, u, i, method, member, cold, member_id=None):
         reasons = []
         genre = self.books.genre[i]
+        if method == "context" and member_id in self.stay:
+            p = self.predicted_pages(member_id)
+            if p and abs(np.log(self.books.pages[i] / p)) < 0.35:
+                reasons.append(f"{int(self.books.pages[i])} pages suits your ~{int(self.stay[member_id])}-min visits")
         if cold:
             if member is not None:
                 reasons.append(f"Popular with {member['department']} readers")
@@ -258,12 +316,12 @@ class Recommender:
             g_share = (self.books.genre.to_numpy()[rated] == genre).mean()
             if g_share >= 0.2:
                 reasons.append(f"You often read {genre}")
-        if method in ("user_cf", "hybrid"):
+        if method in ("user_cf", "hybrid", "context"):
             nn = np.argsort(-self.user_sim[u])[:30]
             fans = nn[self.R[nn, i] >= 4]
             if len(fans):
                 reasons.append(f"{len(fans)} reader{'s' if len(fans) > 1 else ''} like you loved it")
-        if method in ("svd", "hybrid") and self.n_ratings[i] >= 5:
+        if method in ("svd", "hybrid", "context") and self.n_ratings[i] >= 5:
             reasons.append(f"Rated {self.R[self.mask[:, i], i].mean():.1f}★ by {int(self.n_ratings[i])} readers")
         if method == "popular" or not reasons:
             reasons.append("Trending in the library")
@@ -286,7 +344,7 @@ def evaluate(frames, k=10, test_frac=0.2, seed=42, min_items=5):
         test_parts.append(g.iloc[idx[:n_test]])
         train_parts.append(g.iloc[idx[n_test:]])
     train, test = pd.concat(train_parts), pd.concat(test_parts)
-    rec = Recommender(frames["books"], frames["members"], train)
+    rec = Recommender(frames["books"], frames["members"], train, frames["visits"])
     explicit = test.merge(frames["ratings"][["member_id", "book_id"]], on=["member_id", "book_id"])
 
     results = {}
@@ -300,7 +358,7 @@ def evaluate(frames, k=10, test_frac=0.2, seed=42, min_items=5):
                 continue
             s = rec.scores(method, rec.uidx[m])
             s = np.where(rec.mask[rec.uidx[m]], -np.inf, s)
-            order = rec._mmr(s, k) if method == "hybrid" else list(np.argsort(-s)[:k])
+            order = rec._mmr(s, k) if method in ("hybrid", "context") else list(np.argsort(-s)[:k])
             top = [int(rec.book_ids[i]) for i in order]
             recommended.update(top)
             hit = [b in relevant for b in top]

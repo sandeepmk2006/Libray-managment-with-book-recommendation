@@ -25,7 +25,10 @@ CREATE TABLE IF NOT EXISTS books (
     year        INTEGER,
     pages       INTEGER,
     description TEXT,
-    copies      INTEGER NOT NULL DEFAULT 3
+    copies      INTEGER NOT NULL DEFAULT 3,
+    ol_key      TEXT,                     -- Open Library work id (scraped)
+    ol_rating   REAL,                     -- Open Library community rating (scraped)
+    want_to_read INTEGER                  -- Open Library want-to-read count (scraped)
 );
 CREATE TABLE IF NOT EXISTS visits (
     visit_id   INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -34,4 +34,5 @@ export const api = {
   graph: (minWeight = 3) => get(`/api/graph/books?min_weight=${minWeight}`),
   cypher: () => get("/api/graph/cypher"),
   ethics: () => get("/api/ethics/report"),
+  occupancy: () => get("/api/occupancy/forecast"),
 };
