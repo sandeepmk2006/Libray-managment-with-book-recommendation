@@ -433,5 +433,11 @@
    "Expect about 52 readers at 12:00 (87% of seats): add a desk assistant.",
    "Expect about 54 readers at 13:00 (90% of seats): open the overflow hall."
   ]
+ },
+ "ethics": {
+  "k_raw": 3,
+  "k_after": 9,
+  "di": 0.9767,
+  "opted_out": 46
  }
 }
