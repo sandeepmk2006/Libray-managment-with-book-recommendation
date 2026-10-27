@@ -1,8 +1,8 @@
-!docs/*.docx
-*.docx
-*.pyc
 .multiagent/worktrees/
-.playwright-mcp/
-.venv/
 __pycache__/
+*.pyc
 data/library.db
+.venv/
+.playwright-mcp/
+*.docx
+!docs/*.docx
